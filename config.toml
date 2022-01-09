@@ -1,0 +1,10 @@
+baseURL = 'https://yyds.page'
+
+languageCode = 'zh-cn'
+
+title = 'yyds.page Site'
+
+theme = "ananke"
+
+publishDir = "docs/"
+
