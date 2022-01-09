@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>yyds.page Site</title>
+    <link>https://yyds.page/</link>
+    <description>Recent content on yyds.page Site</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh-cn</language>
+    <lastBuildDate>Sun, 09 Jan 2022 21:44:59 +0800</lastBuildDate><atom:link href="https://yyds.page/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Chromium Checkout &amp; Custom Build (on Apple M1 Chip)</title>
+      <link>https://yyds.page/posts/chromium-macos-m1-arm64-custom-build/</link>
+      <pubDate>Sun, 09 Jan 2022 21:44:59 +0800</pubDate>
+      
+      <guid>https://yyds.page/posts/chromium-macos-m1-arm64-custom-build/</guid>
+      <description>chromium 国内下载&amp;amp;自定义编译（在Apple M1芯片） 说明 作者想要编译Chromium, 但手头是Apple Silicon (M1 Pro)开发设备，相关资料都是X86 CPU架构的，想要编译却受限于相关中文资料匮乏。
+经过一番摸（踩）索（坑），编译出了M1可用的Arm 64版本，分享于此，方便后来人。
+注： Chromium采用的是Stable分支的`96.0.4664.125`  参考信息  https://www.chromium.org/developers/how-tos/get-the-code https://www.chromium.org/developers/how-tos/old-get-the-code  一、Checkout, Build, &amp;amp; Run Chromium 1. 设置Http/Https代理 # 设置环境变量 export http_proxy=http://127.0.0.1:7070;export https_proxy=http://127.0.0.1:7070; # gclient使用代理配置 cat &amp;gt; ~/.boto &amp;lt;&amp;lt;EOF [Boto] proxy = 127.0.0.1 # 端口号和上面相同 proxy_port = 1087 proxy_type = http #ca_certificates_file = /path/to/certificate.crt EOF # 设置gclient代理环境变量 export NO_AUTH_BOTO_CONFIG=~/.boto # 配置git参数 git config --global pack.packSizeLimit 1g git config --global pack.deltaCacheSize 1g git config --global pack.</description>
+    </item>
+    
+  </channel>
+</rss>

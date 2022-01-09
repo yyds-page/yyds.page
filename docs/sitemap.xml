@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+  xmlns:xhtml="http://www.w3.org/1999/xhtml">
+  <url>
+    <loc>https://yyds.page/posts/chromium-macos-m1-arm64-custom-build/</loc>
+    <lastmod>2022-01-09T21:44:59+08:00</lastmod>
+  </url><url>
+    <loc>https://yyds.page/posts/</loc>
+    <lastmod>2022-01-09T21:44:59+08:00</lastmod>
+  </url><url>
+    <loc>https://yyds.page/</loc>
+    <lastmod>2022-01-09T21:44:59+08:00</lastmod>
+  </url><url>
+    <loc>https://yyds.page/categories/</loc>
+  </url><url>
+    <loc>https://yyds.page/tags/</loc>
+  </url>
+</urlset>

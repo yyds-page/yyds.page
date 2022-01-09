@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    
+    <title>Chromium Checkout &amp; Custom Build (on Apple M1 Chip) | yyds.page Site</title>
+    <meta name="viewport" content="width=device-width,minimum-scale=1">
+    <meta name="description" content="chromium 国内下载&amp;自定义编译（在Apple M1芯片） 说明 作者想要编译Chromium, 但手头是Apple Silicon (M1 Pro)开发设备，相关资料都是X86 CPU架构的，想要编译却受限于相关中文资料匮乏。
+经过一番摸（踩）索（坑），编译出了M1可用的Arm 64版本，分享于此，方便后来人。
+注： Chromium采用的是Stable分支的`96.0.4664.125`  参考信息  https://www.chromium.org/developers/how-tos/get-the-code https://www.chromium.org/developers/how-tos/old-get-the-code  一、Checkout, Build, &amp; Run Chromium 1. 设置Http/Https代理 # 设置环境变量 export http_proxy=http://127.0.0.1:7070;export https_proxy=http://127.0.0.1:7070; # gclient使用代理配置 cat &gt; ~/.boto &lt;&lt;EOF [Boto] proxy = 127.0.0.1 # 端口号和上面相同 proxy_port = 1087 proxy_type = http #ca_certificates_file = /path/to/certificate.crt EOF # 设置gclient代理环境变量 export NO_AUTH_BOTO_CONFIG=~/.boto # 配置git参数 git config --global pack.packSizeLimit 1g git config --global pack.deltaCacheSize 1g git config --global pack.">
+    <meta name="generator" content="Hugo 0.91.2" />
+    
+    
+      <META NAME="ROBOTS" CONTENT="NOINDEX, NOFOLLOW">
+    
+
+    
+<link rel="stylesheet" href="/ananke/css/main.min.css" >
+
+
+
+    
+    
+    
+      
+
+    
+
+    
+    
+    <meta property="og:title" content="Chromium Checkout &amp; Custom Build (on Apple M1 Chip)" />
+<meta property="og:description" content="chromium 国内下载&amp;自定义编译（在Apple M1芯片） 说明 作者想要编译Chromium, 但手头是Apple Silicon (M1 Pro)开发设备，相关资料都是X86 CPU架构的，想要编译却受限于相关中文资料匮乏。
+经过一番摸（踩）索（坑），编译出了M1可用的Arm 64版本，分享于此，方便后来人。
+注： Chromium采用的是Stable分支的`96.0.4664.125`  参考信息  https://www.chromium.org/developers/how-tos/get-the-code https://www.chromium.org/developers/how-tos/old-get-the-code  一、Checkout, Build, &amp; Run Chromium 1. 设置Http/Https代理 # 设置环境变量 export http_proxy=http://127.0.0.1:7070;export https_proxy=http://127.0.0.1:7070; # gclient使用代理配置 cat &gt; ~/.boto &lt;&lt;EOF [Boto] proxy = 127.0.0.1 # 端口号和上面相同 proxy_port = 1087 proxy_type = http #ca_certificates_file = /path/to/certificate.crt EOF # 设置gclient代理环境变量 export NO_AUTH_BOTO_CONFIG=~/.boto # 配置git参数 git config --global pack.packSizeLimit 1g git config --global pack.deltaCacheSize 1g git config --global pack." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://yyds.page/posts/chromium-macos-m1-arm64-custom-build/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2022-01-09T21:44:59+08:00" />
+<meta property="article:modified_time" content="2022-01-09T21:44:59+08:00" />
+
+<meta itemprop="name" content="Chromium Checkout &amp; Custom Build (on Apple M1 Chip)">
+<meta itemprop="description" content="chromium 国内下载&amp;自定义编译（在Apple M1芯片） 说明 作者想要编译Chromium, 但手头是Apple Silicon (M1 Pro)开发设备，相关资料都是X86 CPU架构的，想要编译却受限于相关中文资料匮乏。
+经过一番摸（踩）索（坑），编译出了M1可用的Arm 64版本，分享于此，方便后来人。
+注： Chromium采用的是Stable分支的`96.0.4664.125`  参考信息  https://www.chromium.org/developers/how-tos/get-the-code https://www.chromium.org/developers/how-tos/old-get-the-code  一、Checkout, Build, &amp; Run Chromium 1. 设置Http/Https代理 # 设置环境变量 export http_proxy=http://127.0.0.1:7070;export https_proxy=http://127.0.0.1:7070; # gclient使用代理配置 cat &gt; ~/.boto &lt;&lt;EOF [Boto] proxy = 127.0.0.1 # 端口号和上面相同 proxy_port = 1087 proxy_type = http #ca_certificates_file = /path/to/certificate.crt EOF # 设置gclient代理环境变量 export NO_AUTH_BOTO_CONFIG=~/.boto # 配置git参数 git config --global pack.packSizeLimit 1g git config --global pack.deltaCacheSize 1g git config --global pack."><meta itemprop="datePublished" content="2022-01-09T21:44:59+08:00" />
+<meta itemprop="dateModified" content="2022-01-09T21:44:59+08:00" />
+<meta itemprop="wordCount" content="806">
+<meta itemprop="keywords" content="" /><meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Chromium Checkout &amp; Custom Build (on Apple M1 Chip)"/>
+<meta name="twitter:description" content="chromium 国内下载&amp;自定义编译（在Apple M1芯片） 说明 作者想要编译Chromium, 但手头是Apple Silicon (M1 Pro)开发设备，相关资料都是X86 CPU架构的，想要编译却受限于相关中文资料匮乏。
+经过一番摸（踩）索（坑），编译出了M1可用的Arm 64版本，分享于此，方便后来人。
+注： Chromium采用的是Stable分支的`96.0.4664.125`  参考信息  https://www.chromium.org/developers/how-tos/get-the-code https://www.chromium.org/developers/how-tos/old-get-the-code  一、Checkout, Build, &amp; Run Chromium 1. 设置Http/Https代理 # 设置环境变量 export http_proxy=http://127.0.0.1:7070;export https_proxy=http://127.0.0.1:7070; # gclient使用代理配置 cat &gt; ~/.boto &lt;&lt;EOF [Boto] proxy = 127.0.0.1 # 端口号和上面相同 proxy_port = 1087 proxy_type = http #ca_certificates_file = /path/to/certificate.crt EOF # 设置gclient代理环境变量 export NO_AUTH_BOTO_CONFIG=~/.boto # 配置git参数 git config --global pack.packSizeLimit 1g git config --global pack.deltaCacheSize 1g git config --global pack."/>
+
+	
+  </head>
+
+  <body class="ma0 avenir bg-near-white">
+
+    
+   
+  
+
+  <header>
+    <div class="bg-black">
+      <nav class="pv3 ph3 ph4-ns" role="navigation">
+  <div class="flex-l justify-between items-center center">
+    <a href="/" class="f3 fw2 hover-white no-underline white-90 dib">
+      
+        yyds.page Site
+      
+    </a>
+    <div class="flex-l items-center">
+      
+
+      
+      
+<div class="ananke-socials">
+  
+</div>
+    </div>
+  </div>
+</nav>
+
+    </div>
+  </header>
+
+
+
+    <main class="pb7" role="main">
+      
+  
+  <article class="flex-l flex-wrap justify-between mw8 center ph3">
+    <header class="mt4 w-100">
+      <aside class="instapaper_ignoref b helvetica tracked">
+          
+        POSTS
+      </aside>
+      
+
+
+
+
+
+
+
+
+
+
+  <div id="sharing" class="mt3 ananke-socials">
+    
+  </div>
+
+
+      <h1 class="f1 athelas mt3 mb1">Chromium Checkout &amp; Custom Build (on Apple M1 Chip)</h1>
+      
+      
+      
+      <time class="f6 mv4 dib tracked" datetime="2022-01-09T21:44:59+08:00">January 9, 2022</time>
+      
+
+      
+      
+    </header>
+    <div class="nested-copy-line-height lh-copy serif f4 nested-links nested-img mid-gray pr4-l w-two-thirds-l"><h1 id="chromium-国内下载自定义编译在apple-m1芯片">chromium 国内下载&amp;自定义编译（在Apple M1芯片）</h1>
+<h2 id="说明">说明</h2>
+<p>作者想要编译Chromium, 但手头是Apple Silicon (M1 Pro)开发设备，相关资料都是X86 CPU架构的，想要编译却受限于相关中文资料匮乏。</p>
+<p>经过一番摸（踩）索（坑），编译出了M1可用的Arm 64版本，分享于此，方便后来人。</p>
+<pre><code>注： Chromium采用的是Stable分支的`96.0.4664.125`
+</code></pre>
+<h2 id="参考信息">参考信息</h2>
+<ul>
+<li><a href="https://www.chromium.org/developers/how-tos/get-the-code">https://www.chromium.org/developers/how-tos/get-the-code</a></li>
+<li><a href="https://www.chromium.org/developers/how-tos/old-get-the-code">https://www.chromium.org/developers/how-tos/old-get-the-code</a></li>
+</ul>
+<h2 id="一checkout-build--run-chromium">一、Checkout, Build, &amp; Run Chromium</h2>
+<h3 id="1-设置httphttps代理">1. 设置Http/Https代理</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell"><span style="color:#75715e"># 设置环境变量</span>
+export http_proxy<span style="color:#f92672">=</span>http://127.0.0.1:7070;export https_proxy<span style="color:#f92672">=</span>http://127.0.0.1:7070;
+
+<span style="color:#75715e"># gclient使用代理配置</span>
+cat &gt; ~/.boto <span style="color:#e6db74">&lt;&lt;EOF
+</span><span style="color:#e6db74">[Boto]
+</span><span style="color:#e6db74">proxy = 127.0.0.1
+</span><span style="color:#e6db74"># 端口号和上面相同
+</span><span style="color:#e6db74">proxy_port = 1087
+</span><span style="color:#e6db74">proxy_type = http
+</span><span style="color:#e6db74">#ca_certificates_file = /path/to/certificate.crt
+</span><span style="color:#e6db74">EOF</span>
+
+<span style="color:#75715e"># 设置gclient代理环境变量</span>
+export NO_AUTH_BOTO_CONFIG<span style="color:#f92672">=</span>~/.boto
+
+<span style="color:#75715e"># 配置git参数</span>
+git config --global pack.packSizeLimit 1g
+git config --global pack.deltaCacheSize 1g
+git config --global pack.windowMemory 1g
+git config --global core.packedGitLimit 1g
+git config --global core.packedGitWindowSize 1g
+git config --global core.precomposeUnicode true
+
+</code></pre></div><h3 id="2-下载chromium-9604664125">2. 下载chromium 96.0.4664.125</h3>
+<p>这里做了改进，不需要下载官方说明里的大量文件，属于最快的方式</p>
+<ul>
+<li>解压后文件，Linux(Ubuntu 18.04)上大约26G, MacOS 20G（包括三方包，未排除.git目录）</li>
+</ul>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">cd ~ 
+
+git clone  -v --progress --depth <span style="color:#ae81ff">1</span> https://chromium.googlesource.com/chromium/tools/depot_tools.git
+
+export PATH<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;</span>$PATH<span style="color:#e6db74">:</span>$HOME<span style="color:#e6db74">/depot_tools&#34;</span>
+
+mkdir chromium <span style="color:#f92672">&amp;&amp;</span> cd chromium
+
+<span style="color:#75715e"># 配置gclient</span>
+gclient config --spec <span style="color:#e6db74">&#39;solutions = [
+</span><span style="color:#e6db74">  {
+</span><span style="color:#e6db74">    &#34;name&#34;: &#34;src&#34;,
+</span><span style="color:#e6db74">    &#34;url&#34;: &#34;https://chromium.googlesource.com/chromium/src.git&#34;,
+</span><span style="color:#e6db74">    &#34;managed&#34;: False,
+</span><span style="color:#e6db74">    &#34;custom_deps&#34;: {},
+</span><span style="color:#e6db74">    &#34;custom_vars&#34;: {},
+</span><span style="color:#e6db74">  },
+</span><span style="color:#e6db74">]
+</span><span style="color:#e6db74">&#39;</span>
+
+<span style="color:#75715e"># 查看配置</span>
+cat .gclient
+
+<span style="color:#75715e"># 下载chromium的96稳定版本</span>
+<span style="color:#75715e"># 克隆指定标签，最小化下载代码，无分支和提交日志数据</span>
+time git clone -v --progress --depth <span style="color:#ae81ff">1</span> --branch 96.0.4664.125 https://chromium.googlesource.com/chromium/src.git
+
+cd src
+
+<span style="color:#75715e"># 根据DEPS文件和操作系统类型下载依赖到相应目录，最终下载的依赖数量可在~/chromiun/.gclient_entries文件中(约120个条目)</span>
+time gclient sync -v --jobs<span style="color:#f92672">=</span><span style="color:#ae81ff">16</span> --nohooks --no-history
+
+</code></pre></div><h3 id="3-安装依赖">3. 安装依赖</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell"><span style="color:#75715e"># 若是Linux系统，安装依赖，其他系统不执行</span>
+./build/install-build-deps.sh
+
+<span style="color:#75715e"># 若为MacOS, 解决两个LASTCHANGE文件不存在的问题</span>
+<span style="color:#75715e"># 针对96.0.4664.125版本</span>
+cat &gt; build/util/LASTCHANGE <span style="color:#e6db74">&lt;&lt;EOF
+</span><span style="color:#e6db74">LASTCHANGE=f9fcf99e5f982d3e9e3fe439c0e7c69ddc965761-refs/heads/96.0.4664.125
+</span><span style="color:#e6db74">LASTCHANGE_YEAR=2021
+</span><span style="color:#e6db74">EOF</span>
+
+cat &gt; build/util/LASTCHANGE.committime <span style="color:#e6db74">&lt;&lt;EOF
+</span><span style="color:#e6db74">1640311313
+</span><span style="color:#e6db74">EOF</span>
+
+cat &gt; build/util/LASTCHANGE.dummy <span style="color:#e6db74">&lt;&lt;EOF
+</span><span style="color:#e6db74">LASTCHANGE=0000000000000000000000000000000000000000-0000000000000000000000000000000000000000
+</span><span style="color:#e6db74">EOF</span>
+<span style="color:#75715e">#或者（不推荐）</span>
+./build/util/lastchange.py  build/util/LASTCHANGE
+./build/util/lastchange.py -s third_party/blink/ -o build/util/LASTCHANGE.blink
+
+<span style="color:#75715e"># 执行Hooks，会下载一些二进制文件和三方包build-tools</span>
+time gclient runhooks -v --jobs<span style="color:#f92672">=</span><span style="color:#ae81ff">8</span>
+
+<span style="color:#75715e"># 特别注意: M1 ARM: vpython软件包在M1 ARM系统上的问题解决：使用高版本chromiun的src/.vpython3替换旧的src/.vpython3</span>
+<span style="color:#75715e"># 主要为numpy, see https://chromium.googlesource.com/chromium/src.git/+/refs/heads/main/.vpython3#60</span>
+<span style="color:#75715e"># # wheel: &lt;</span>
+<span style="color:#75715e">#   name: &#34;infra/python/wheels/numpy/${vpython_platform}&#34;</span>
+<span style="color:#75715e">#   version: &#34;version:1.20.3&#34;</span>
+<span style="color:#75715e">#   # A newer version of numpy is required on ARM64, but it breaks older OS versions.</span>
+<span style="color:#75715e">#   not_match_tag &lt;</span>
+<span style="color:#75715e">#     platform: &#34;macosx_11_0_arm64&#34;</span>
+<span style="color:#75715e">#   &gt;</span>
+<span style="color:#75715e"># &gt;</span>
+<span style="color:#75715e"># wheel: &lt;</span>
+<span style="color:#75715e">#   name: &#34;infra/python/wheels/numpy/mac-arm64_cp38_cp38&#34;</span>
+<span style="color:#75715e">#   version: &#34;version:1.21.1&#34;</span>
+<span style="color:#75715e">#   match_tag &lt;</span>
+<span style="color:#75715e">#     platform: &#34;macosx_11_0_arm64&#34;</span>
+<span style="color:#75715e">#   &gt;</span>
+<span style="color:#75715e"># &gt;</span>
+<span style="color:#75715e"># 然后继续执行 time gclient runhooks -v --jobs=8</span>
+
+</code></pre></div><h3 id="4-编译">4. 编译</h3>
+<ul>
+<li>编译选项
+<ul>
+<li>Tips: 查看当前所有编译选项：<code>gn args --list &lt;out_dir&gt;</code></li>
+</ul>
+</li>
+</ul>
+<ul>
+<li>Release编译选项：</li>
+</ul>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">is_debug<span style="color:#f92672">=</span>false
+dcheck_always_on<span style="color:#f92672">=</span>true
+symbol_level<span style="color:#f92672">=</span><span style="color:#ae81ff">0</span>
+<span style="color:#75715e"># use_jumbo_build</span>
+is_component_build<span style="color:#f92672">=</span>false
+is_official_build<span style="color:#f92672">=</span>true
+enable_nacl<span style="color:#f92672">=</span>false
+blink_symbol_level<span style="color:#f92672">=</span><span style="color:#ae81ff">0</span>
+chrome_pgo_phase<span style="color:#f92672">=</span><span style="color:#ae81ff">0</span>
+cc_wrapper<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;ccache&#34;</span>
+enable_js_type_check<span style="color:#f92672">=</span>false
+enable_remoting<span style="color:#f92672">=</span>false
+enable_extensions<span style="color:#f92672">=</span>true
+</code></pre></div><ul>
+<li>MacOS</li>
+</ul>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">brew install ccache
+
+sudo xcode-select -r
+
+<span style="color:#75715e"># 生成配置</span>
+gn gen out/Profile --args<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;is_debug=false dcheck_always_on=true symbol_level=0 is_component_build=false is_official_build=true enable_nacl=false blink_symbol_level=0 chrome_pgo_phase=0 cc_wrapper=&#34;ccache&#34; enable_js_type_check=false enable_remoting=false enable_extensions=true &#39;</span>
+
+<span style="color:#75715e"># 编译（时间根据cpu能力不同，首次编译耗时1-6个小时不等）</span>
+time autoninja -C out/Profile chrome
+
+</code></pre></div><ul>
+<li>Windows</li>
+</ul>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-powershell" data-lang="powershell"><span style="color:#75715e"># TODO: </span>
+</code></pre></div><ul>
+<li>Linux</li>
+</ul>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">apt install -y ccache
+
+gn gen out/Profile --args<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;is_debug=false dcheck_always_on=true symbol_level=0 is_component_build=false is_official_build=true enable_nacl=false blink_symbol_level=0 chrome_pgo_phase=0 cc_wrapper=&#34;ccache&#34; enable_js_type_check=false enable_remoting=false enable_extensions=true &#39;</span>
+
+time autoninja -C out/Profile chrome
+
+</code></pre></div><h2 id="二其他">二、其他</h2>
+<h3 id="附1删除不必要的文件可选">附1：删除不必要的文件(可选)</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell"><span style="color:#75715e"># 编译.git的大小</span>
+find . -name .git | xargs du -hsm | cut -f <span style="color:#ae81ff">1</span> | awk <span style="color:#e6db74">&#39;{s+=$1} END {printf &#34;total .git: %d MB\n&#34;, s}&#39;</span>
+<span style="color:#75715e"># output: total .git: 9571 MB</span>
+
+<span style="color:#75715e"># 可选：删除.git目录，因占用空间，在使用期间不要删除</span>
+find . -name .git | xargs rm -rf
+</code></pre></div><h3 id="附2macos-m1编译错误解决">附2：MacOS M1编译错误解决：</h3>
+<p>error: functions that differ only in their return type cannot be overloaded</p>
+<p>summary: Get target &ldquo;chrome&rdquo; to build with the macOS 12.0 SDK</p>
+<p>see patch: <a href="https://chromium.googlesource.com/chromium/src.git/+/11a0c895953506d063c3dc8076a6bfd1f037eaf5%5E%21/">https://chromium.googlesource.com/chromium/src.git/+/11a0c895953506d063c3dc8076a6bfd1f037eaf5%5E%21/</a></p>
+<p>补丁涉及文件：<code>accessibility_tree_formatter_utils_mac.mm</code>、 <code>browser_accessibility_cocoa.mm</code></p>
+<p>生成补丁：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">LC_ALL<span style="color:#f92672">=</span>C TZ<span style="color:#f92672">=</span>UTC0 diff -Naur content/browser/accessibility content/browser/accessibility-modify &gt; accessibility_mac_12_0_sdk.patch
+</code></pre></div><p>补丁文件<code>accessibility_mac_12_0_sdk.patch</code></p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-objc" data-lang="objc">diff <span style="color:#f92672">-</span>Naur content<span style="color:#f92672">/</span>browser<span style="color:#f92672">/</span>accessibility<span style="color:#f92672">/</span>accessibility_tree_formatter_utils_mac.mm content<span style="color:#f92672">/</span>browser<span style="color:#f92672">/</span>accessibility<span style="color:#f92672">-</span>modify<span style="color:#f92672">/</span>accessibility_tree_formatter_utils_mac.mm
+<span style="color:#f92672">---</span> content<span style="color:#f92672">/</span>browser<span style="color:#f92672">/</span>accessibility<span style="color:#f92672">/</span>accessibility_tree_formatter_utils_mac.mm <span style="color:#ae81ff">2021</span><span style="color:#f92672">-</span><span style="color:#ae81ff">12</span><span style="color:#f92672">-</span><span style="color:#ae81ff">04</span> <span style="color:#ae81ff">09</span><span style="color:#f92672">:</span><span style="color:#ae81ff">59</span><span style="color:#f92672">:</span><span style="color:#ae81ff">45.000000000</span> <span style="color:#f92672">+</span><span style="color:#ae81ff">0000</span>
+<span style="color:#f92672">+++</span> content<span style="color:#f92672">/</span>browser<span style="color:#f92672">/</span>accessibility<span style="color:#f92672">-</span>modify<span style="color:#f92672">/</span>accessibility_tree_formatter_utils_mac.mm  <span style="color:#ae81ff">2021</span><span style="color:#f92672">-</span><span style="color:#ae81ff">12</span><span style="color:#f92672">-</span><span style="color:#ae81ff">05</span> <span style="color:#ae81ff">03</span><span style="color:#f92672">:</span><span style="color:#ae81ff">39</span><span style="color:#f92672">:</span><span style="color:#ae81ff">46.000000000</span> <span style="color:#f92672">+</span><span style="color:#ae81ff">0000</span>
+@@ <span style="color:#f92672">-</span><span style="color:#ae81ff">10</span>,<span style="color:#ae81ff">12</span> <span style="color:#f92672">+</span><span style="color:#ae81ff">10</span>,<span style="color:#ae81ff">19</span> @@
+ 
+ using ui<span style="color:#f92672">::</span>AXPropertyNode;
+ 
+-<span style="color:#a6e22e">extern</span> <span style="color:#e6db74">&#34;C&#34;</span> {
+<span style="color:#f92672">+</span><span style="color:#960050;background-color:#1e0010">#</span><span style="color:#66d9ef">if</span> <span style="color:#f92672">!</span>defined(MAC_OS_VERSION_12_0) <span style="color:#f92672">||</span> \
+<span style="color:#f92672">+</span>    MAC_OS_X_VERSION_MAX_ALLOWED <span style="color:#f92672">&lt;</span> MAC_OS_VERSION_12_0
+<span style="color:#f92672">+</span>using AXTextMarkerRangeRef <span style="color:#f92672">=</span> CFTypeRef;
++<span style="color:#a6e22e">using</span> AXTextMarkerRef <span style="color:#f92672">=</span> CFTypeRef;
+<span style="color:#f92672">+</span>
+ 
+<span style="color:#f92672">-</span>CFTypeRef AXTextMarkerRangeCopyStartMarker(CFTypeRef);
++<span style="color:#a6e22e">extern</span> <span style="color:#e6db74">&#34;C&#34;</span> {
+ 
+<span style="color:#f92672">-</span>CFTypeRef AXTextMarkerRangeCopyEndMarker(CFTypeRef);
++<span style="color:#a6e22e">AXTextMarkerRef</span> AXTextMarkerRangeCopyStartMarker(AXTextMarkerRangeRef);
++<span style="color:#a6e22e">AXTextMarkerRef</span> AXTextMarkerRangeCopyEndMarker(AXTextMarkerRangeRef);
+ }  <span style="color:#75715e">// extern &#34;C&#34;
+</span><span style="color:#75715e"></span><span style="color:#f92672">+</span><span style="color:#960050;background-color:#1e0010">#</span>endif
+<span style="color:#f92672">+</span>
+ 
+ namespace content {
+ namespace a11y {
+@@ <span style="color:#f92672">-</span><span style="color:#ae81ff">261</span>,<span style="color:#ae81ff">12</span> <span style="color:#f92672">+</span><span style="color:#ae81ff">268</span>,<span style="color:#ae81ff">12</span> @@
+     <span style="color:#66d9ef">const</span> <span style="color:#66d9ef">id</span> target,
+     <span style="color:#66d9ef">const</span> AXPropertyNode<span style="color:#f92672">&amp;</span> property_node) <span style="color:#66d9ef">const</span> {
+   <span style="color:#66d9ef">if</span> (property_node.name_or_value <span style="color:#f92672">==</span> <span style="color:#e6db74">&#34;anchor&#34;</span>)
+<span style="color:#f92672">-</span>    <span style="color:#66d9ef">return</span> OptionalNSObject(static_cast<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">id</span><span style="color:#f92672">&gt;</span>(
+<span style="color:#f92672">-</span>        AXTextMarkerRangeCopyStartMarker(static_cast<span style="color:#f92672">&lt;</span>CFTypeRef<span style="color:#f92672">&gt;</span>(target))));
++    <span style="color:#a6e22e">return</span> OptionalNSObject(static_cast<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">id</span><span style="color:#f92672">&gt;</span>(AXTextMarkerRangeCopyStartMarker(
+<span style="color:#f92672">+</span>        static_cast<span style="color:#f92672">&lt;</span>AXTextMarkerRangeRef<span style="color:#f92672">&gt;</span>(target))));
+ 
+   <span style="color:#66d9ef">if</span> (property_node.name_or_value <span style="color:#f92672">==</span> <span style="color:#e6db74">&#34;focus&#34;</span>)
+<span style="color:#f92672">-</span>    <span style="color:#66d9ef">return</span> OptionalNSObject(static_cast<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">id</span><span style="color:#f92672">&gt;</span>(
+<span style="color:#f92672">-</span>        AXTextMarkerRangeCopyEndMarker(static_cast<span style="color:#f92672">&lt;</span>CFTypeRef<span style="color:#f92672">&gt;</span>(target))));
++    <span style="color:#a6e22e">return</span> OptionalNSObject(static_cast<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">id</span><span style="color:#f92672">&gt;</span>(AXTextMarkerRangeCopyEndMarker(
+<span style="color:#f92672">+</span>        static_cast<span style="color:#f92672">&lt;</span>AXTextMarkerRangeRef<span style="color:#f92672">&gt;</span>(target))));
+ 
+   <span style="color:#75715e">// Unmatched attribute. No error for a tree dump calls because the tree dump
+</span><span style="color:#75715e"></span>   <span style="color:#75715e">// sets generic property filters not depending on a node, so we can be called
+</span><span style="color:#75715e"></span>diff <span style="color:#f92672">-</span>Naur content<span style="color:#f92672">/</span>browser<span style="color:#f92672">/</span>accessibility<span style="color:#f92672">/</span>browser_accessibility_cocoa.mm content<span style="color:#f92672">/</span>browser<span style="color:#f92672">/</span>accessibility<span style="color:#f92672">-</span>modify<span style="color:#f92672">/</span>browser_accessibility_cocoa.mm
+<span style="color:#f92672">---</span> content<span style="color:#f92672">/</span>browser<span style="color:#f92672">/</span>accessibility<span style="color:#f92672">/</span>browser_accessibility_cocoa.mm  <span style="color:#ae81ff">2021</span><span style="color:#f92672">-</span><span style="color:#ae81ff">12</span><span style="color:#f92672">-</span><span style="color:#ae81ff">04</span> <span style="color:#ae81ff">09</span><span style="color:#f92672">:</span><span style="color:#ae81ff">59</span><span style="color:#f92672">:</span><span style="color:#ae81ff">45.000000000</span> <span style="color:#f92672">+</span><span style="color:#ae81ff">0000</span>
+<span style="color:#f92672">+++</span> content<span style="color:#f92672">/</span>browser<span style="color:#f92672">/</span>accessibility<span style="color:#f92672">-</span>modify<span style="color:#f92672">/</span>browser_accessibility_cocoa.mm <span style="color:#ae81ff">2021</span><span style="color:#f92672">-</span><span style="color:#ae81ff">12</span><span style="color:#f92672">-</span><span style="color:#ae81ff">05</span> <span style="color:#ae81ff">03</span><span style="color:#f92672">:</span><span style="color:#ae81ff">43</span><span style="color:#f92672">:</span><span style="color:#ae81ff">13.000000000</span> <span style="color:#f92672">+</span><span style="color:#ae81ff">0000</span>
+@@ <span style="color:#f92672">-</span><span style="color:#ae81ff">40</span>,<span style="color:#ae81ff">8</span> <span style="color:#f92672">+</span><span style="color:#ae81ff">40</span>,<span style="color:#ae81ff">6</span> @@
+ 
+ <span style="color:#75715e">#import &#34;ui/accessibility/platform/ax_platform_node_mac.h&#34;
+</span><span style="color:#75715e"></span> 
+<span style="color:#f92672">-</span>using AXTextMarkerRangeRef <span style="color:#f92672">=</span> CFTypeRef;
+-<span style="color:#a6e22e">using</span> AXTextMarkerRef <span style="color:#f92672">=</span> CFTypeRef;
+ using StringAttribute <span style="color:#f92672">=</span> ax<span style="color:#f92672">::</span>mojom<span style="color:#f92672">::</span>StringAttribute;
+ using content<span style="color:#f92672">::</span>AccessibilityMatchPredicate;
+ using content<span style="color:#f92672">::</span>BrowserAccessibility;
+@@ <span style="color:#f92672">-</span><span style="color:#ae81ff">241</span>,<span style="color:#ae81ff">33</span> <span style="color:#f92672">+</span><span style="color:#ae81ff">239</span>,<span style="color:#ae81ff">34</span> @@
+ <span style="color:#75715e">// VoiceOver uses -1 to mean &#34;no limit&#34; for AXResultsLimit.
+</span><span style="color:#75715e"></span> <span style="color:#66d9ef">const</span> <span style="color:#66d9ef">int</span> kAXResultsLimitNoLimit <span style="color:#f92672">=</span> <span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>;
+ 
+-<span style="color:#a6e22e">extern</span> <span style="color:#e6db74">&#34;C&#34;</span> {
+ 
+ <span style="color:#75715e">// The following are private accessibility APIs required for cursor navigation
+</span><span style="color:#75715e"></span> <span style="color:#75715e">// and text selection. VoiceOver started relying on them in Mac OS X 10.11.
+</span><span style="color:#75715e"></span><span style="color:#f92672">+</span><span style="color:#75715e">// They are public as of the 12.0 SDK.
+</span><span style="color:#75715e"></span><span style="color:#f92672">+</span><span style="color:#960050;background-color:#1e0010">#</span><span style="color:#66d9ef">if</span> <span style="color:#f92672">!</span>defined(MAC_OS_VERSION_12_0) <span style="color:#f92672">||</span> \
+<span style="color:#f92672">+</span>    MAC_OS_X_VERSION_MAX_ALLOWED <span style="color:#f92672">&lt;</span> MAC_OS_VERSION_12_0
+<span style="color:#f92672">+</span>using AXTextMarkerRangeRef <span style="color:#f92672">=</span> CFTypeRef;
++<span style="color:#a6e22e">using</span> AXTextMarkerRef <span style="color:#f92672">=</span> CFTypeRef;
++<span style="color:#a6e22e">extern</span> <span style="color:#e6db74">&#34;C&#34;</span> {
+ CFTypeID AXTextMarkerGetTypeID();
+ 
+-<span style="color:#a6e22e">AXTextMarkerRef</span> AXTextMarkerCreate(CFAllocatorRef allocator,
+<span style="color:#f92672">+</span>AXTextMarkerRef AXTextMarkerCreate(CFAllocatorRef,
+                                    <span style="color:#66d9ef">const</span> <span style="color:#66d9ef">UInt8</span><span style="color:#f92672">*</span> bytes,
+                                    CFIndex length);
+ 
+-<span style="color:#a6e22e">const</span> <span style="color:#66d9ef">UInt8</span><span style="color:#f92672">*</span> <span style="color:#a6e22e">AXTextMarkerGetBytePtr</span>(AXTextMarkerRef text_marker);
+<span style="color:#f92672">-</span>
+<span style="color:#f92672">-</span>size_t AXTextMarkerGetLength(AXTextMarkerRef text_marker);
++<span style="color:#a6e22e">size_t</span> AXTextMarkerGetLength(AXTextMarkerRef);
++<span style="color:#a6e22e">const</span> <span style="color:#66d9ef">UInt8</span><span style="color:#f92672">*</span> <span style="color:#a6e22e">AXTextMarkerGetBytePtr</span>(AXTextMarkerRef);
+ 
+ CFTypeID <span style="color:#a6e22e">AXTextMarkerRangeGetTypeID</span>();
+ 
+-<span style="color:#a6e22e">AXTextMarkerRangeRef</span> AXTextMarkerRangeCreate(CFAllocatorRef allocator,
+<span style="color:#f92672">-</span>                                             AXTextMarkerRef start_marker,
+<span style="color:#f92672">-</span>                                             AXTextMarkerRef end_marker);
+<span style="color:#f92672">-</span>
+<span style="color:#f92672">-</span>AXTextMarkerRef AXTextMarkerRangeCopyStartMarker(
+<span style="color:#f92672">-</span>    AXTextMarkerRangeRef text_marker_range);
+<span style="color:#f92672">-</span>
+<span style="color:#f92672">-</span>AXTextMarkerRef AXTextMarkerRangeCopyEndMarker(
+<span style="color:#f92672">-</span>    AXTextMarkerRangeRef text_marker_range);
++<span style="color:#a6e22e">AXTextMarkerRangeRef</span> AXTextMarkerRangeCreate(CFAllocatorRef,
+<span style="color:#f92672">+</span>                                             AXTextMarkerRef start,
+<span style="color:#f92672">+</span>                                             AXTextMarkerRef end);
++<span style="color:#a6e22e">AXTextMarkerRef</span> AXTextMarkerRangeCopyStartMarker(AXTextMarkerRangeRef);
++<span style="color:#a6e22e">AXTextMarkerRef</span> AXTextMarkerRangeCopyEndMarker(AXTextMarkerRangeRef);
+ 
+ }  <span style="color:#75715e">// extern &#34;C&#34;
+</span><span style="color:#75715e"></span><span style="color:#f92672">+</span><span style="color:#960050;background-color:#1e0010">#</span>endif
+ 
+ <span style="color:#75715e">// AXTextMarkerCreate is a system function that makes a copy of the data buffer
+</span><span style="color:#75715e"></span> <span style="color:#75715e">// given to it.
+</span><span style="color:#75715e"></span>@@ <span style="color:#f92672">-</span><span style="color:#ae81ff">795</span>,<span style="color:#ae81ff">7</span> <span style="color:#f92672">+</span><span style="color:#ae81ff">794</span>,<span style="color:#ae81ff">9</span> @@
+ 
+ <span style="color:#66d9ef">id</span> content<span style="color:#f92672">::</span>AXTextMarkerRangeFrom(<span style="color:#66d9ef">id</span> anchor_textmarker, <span style="color:#66d9ef">id</span> focus_textmarker) {
+   AXTextMarkerRangeRef cf_marker_range <span style="color:#f92672">=</span> AXTextMarkerRangeCreate(
+<span style="color:#f92672">-</span>      kCFAllocatorDefault, anchor_textmarker, focus_textmarker);
++      <span style="color:#a6e22e">kCFAllocatorDefault</span>, static_cast<span style="color:#f92672">&lt;</span>AXTextMarkerRef<span style="color:#f92672">&gt;</span>(anchor_textmarker),
+<span style="color:#f92672">+</span>      static_cast<span style="color:#f92672">&lt;</span>AXTextMarkerRef<span style="color:#f92672">&gt;</span>(focus_textmarker));
++
+   <span style="color:#a6e22e">return</span> [static_cast<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">id</span><span style="color:#f92672">&gt;</span>(cf_marker_range) autorelease];
+ }
+ 
+</code></pre></div><p>打补丁：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">cd <span style="color:#e6db74">${</span>HOME<span style="color:#e6db74">}</span>/chromium/src
+patch -p0 &lt; accessibility_mac_12_0_sdk.patch
+</code></pre></div><ul class="pa0">
+  
+</ul>
+<div class="mt6 instapaper_ignoref">
+      
+      
+      </div>
+    </div>
+
+    <aside class="w-30-l mt6-l">
+
+
+
+
+</aside>
+
+  </article>
+
+    </main>
+    <footer class="bg-black bottom-0 w-100 pa3" role="contentinfo">
+  <div class="flex justify-between">
+  <a class="f4 fw4 hover-white no-underline white-70 dn dib-ns pv2 ph3" href="https://yyds.page" >
+    &copy;  yyds.page Site 2022 
+  </a>
+    <div>
+<div class="ananke-socials">
+  
+</div></div>
+  </div>
+</footer>
+
+  </body>
+</html>
